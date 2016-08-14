@@ -4,28 +4,89 @@ output: pdf_document
 date: "August 14, 2016"
 ---
 
-To generate output run
-rmarkdown::render('exploring_redhat_data.Rmd', output_file = 'markdown/exploring_redhat.[html,pdf]')
-
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-read data
-```{r, cache=TRUE}
+```{r}
+library(ggplot2)
 library(data.table)
+```
+
+
+Functions for rendering HTML and PDF documents
+```{r}
+render_pdf <-  function() {
+    rmarkdown::render('exploring_redhat_data.Rmd', 
+                      output_file = 'markdown/exploring_redhat.pdf')
+}
+
+render_html <-  function() {
+    rmarkdown::render('exploring_redhat_data.Rmd', 
+                      output_file = 'markdown/exploring_redhat.html')
+}
+```
+
+
+### Read data
+```{r, cache=TRUE}
 activities_raw <- fread('../data/raw/act_train.csv')
 people_raw <- fread('../data/raw/people.csv')
 ```
 
+
+### Data summary 
 ```{r, cache=TRUE}
 summary(activities_raw)
 summary(people_raw)
 ```
 
+Inspect outomces for variables char_1
+```{r, cache=T}
+counts <- table(activities_raw[, c('char_1', 'outcome'), with=F])
 
-You can also embed plots, for example:
+activities_df <- as.data.frame(counts)
+activities_df$char_1 <- reorder(activities_df$char_1, activities_df$Freq)
+ind_split <- as.integer((length(levels(activities_df$char_1))-1) / 2)
+most_frequent_levels <- levels(activities_df$char_1)[(ind_split+1): length(levels(activities_df$char_1))]
+second_frequent_levels <- levels(activities_df$char_1)[1:ind_split]
 
-```{r, echo=FALSE}
-plot(cars)
+ggplot(data=activities_df[activities_df$char_1 %in% most_frequent_levels, ],  
+       aes(x=char_1, y=Freq,  color=outcome)) +
+    geom_bar(stat='identity') +
+    theme(axis.text.x=element_text(angle=90, size=11)) +
+    scale_x_discrete(labels=abbreviate) +
+    coord_flip()
+
+ggplot(data=activities_df[activities_df$char_1 %in% second_frequent_levels,],
+       aes(x=char_1, y=Freq, color=outcome)) +
+    geom_bar(stat='identity') +
+    theme(axis.text.x=element_text(angle=90, size=11)) +
+    scale_x_discrete(labels=abbreviate) +
+    coord_flip()
+
+
+df_without_blanks <- activities_df[activities_df$char_1 != '',]
+df_without_blanks$char_1 <- as.factor(df_without_blanks$char_1)
+
+ggplot(data=df_without_blanks[df_without_blanks$char_1 %in% most_frequent_levels, ],  
+       aes(x=char_1, y=Freq, color=outcome)) +
+    geom_bar(stat='identity') +  
+    theme(axis.text.x=element_text(angle=90, size=11)) +
+    scale_x_discrete(labels=abbreviate) +
+    coord_flip()
+
+ggplot(data=df_without_blanks[df_without_blanks$char_1 %in% second_frequent_levels, ],  
+       aes(x=char_1, y=Freq, color=outcome)) +
+    geom_bar(stat='identity') +  
+    theme(axis.text.x=element_text(angle=90, size=11)) +
+    scale_x_discrete(labels=abbreviate) +
+    coord_flip()
+
+counts <- table(activities_raw$char_1)
+counts[order(counts, decreasing=T)]
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Most outcomes for variable char_1 are blanks. Counting number of blanks for each variable is
+easily done by the colSums function
+```{r, cache=T}
+colSums(activities_raw == '')
+```
