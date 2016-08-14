@@ -81,11 +81,12 @@ ggplot(data=df_without_blanks[df_without_blanks$char_1 %in% second_frequent_leve
     scale_x_discrete(labels=abbreviate) +
     coord_flip()
 
+
 counts <- table(activities_raw$char_1)
 counts[order(counts, decreasing=T)]
 ```
 
-Most outcomes for variable char_1 are blanks. Counting number of blanks for each variable is
+Most outcomes for variable char_1 are blanks. Counting the number of blanks for each variable is
 easily done by the colSums function
 ```{r, cache=T}
 colSums(activities_raw == '')
