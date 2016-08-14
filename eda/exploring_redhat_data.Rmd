@@ -1,0 +1,31 @@
+---
+title: "exploring-redhat-data"
+date: "August 14, 2016"
+output: html_document
+---
+
+To generate output run
+rmarkdown::render('exploring_redhat_data.Rmd', output_file = 'markdown/exploring_redhat.html')
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+read data
+```{r, cache=TRUE}
+library(data.table)
+activities_raw <- fread('../data/raw/act_train.csv')
+people_raw <- fread('../data/raw/people.csv')
+```
+
+```{r, cache=TRUE}
+summary(activities_raw)
+summary(people_raw)
+```
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
