@@ -1,6 +1,6 @@
 merge_and_write_data_to_disk <- function() {
     # Merges the activity and the people data by people_id and writes
-    # the result to disc.
+    # the result to disk.
     
     # The function returns a string communicating the result.
     
