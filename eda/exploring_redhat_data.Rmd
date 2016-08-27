@@ -10,6 +10,8 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 library(ggplot2)
 library(data.table)
 library(dplyr)
+
+source('../src/data/merge_data_to_disk.R')
 ```
 
 Functions for rendering HTML and PDF documents
@@ -25,48 +27,21 @@ render_html <-  function() {
 }
 ```
 
-### TODO: Merge activities and people
-
-
 ### Read data
 ```{r, cache=TRUE}
-activities_raw <- fread('../data/raw/act_train.csv')
-people_raw <- fread('../data/raw/people.csv')
-
-# Rename columns
-cols <- paste0('char_', 1:10)
-for (c in cols) {
-    col_ind <- which(colnames(activities_raw) == c)
-    colnames(activities_raw)[col_ind] <- paste0('activity_', c)
-} 
-
-cols <- paste0('char_', 1:38)
-for (c in cols) {
-    col_ind <- which(colnames(people_raw) == c)
-    colnames(people_raw)[col_ind] <- paste0('people_', c)
-} 
-
+merge_and_write_data_to_disk()
 merged_raw <- fread('../data/processed/merged_data.csv')
 ```
 
 ### Data summary 
 ```{r, cache=TRUE}
-head(activities_raw,2)
-head(people_raw,2)
 head(merged_raw,2)
-```
-
-Write merged data to disk
-```{r, cache=TRUE}
-# colnames(merged_raw)[which(colnames(merged_raw) == 'date.x')] <- 'people_date'
-# colnames(merged_raw)[which(colnames(merged_raw) == 'date.y')] <- 'activity_date'
-# write.csv(x=merged_raw, file='../data/processed/merged_data.csv')
-# merged_raw <- merge(x=people_raw, y=activities_raw, by='people_id')
 ```
 
 Inspect outomces for variable activity_char_1
 ```{r, cache=T}
-counts <- table(activities_raw[, c('activity_char_1', 'outcome'), with=F])
+gc()
+counts <- table(merged_raw[, c('activity_char_1', 'outcome'), with=F])
 
 activities_df <- as.data.frame(counts)
 activities_df$activity_char_1 <- reorder(activities_df$activity_char_1, activities_df$Freq)
@@ -109,7 +84,7 @@ ggplot(
     coord_flip()
 
 
-counts <- table(activities_raw$activity_char_1)
+counts <- table(merged_raw$activity_char_1)
 counts[order(counts, decreasing=T)]
 ```
 
