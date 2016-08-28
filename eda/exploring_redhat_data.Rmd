@@ -115,9 +115,10 @@ Notice that the number of blanks for variables activity_char_1 up to 9 is consta
 gc()
 ```
 
-Number of unqie values for each variable
+Number of unqie values for each variable and when grouping over outcome
 ```{r, cache=T}
-apply(merged_raw, MARGIN=2, function(x) length(unique(x)))
+merged_raw[, lapply(.SD, function(x) length(unique(x)))]
+merged_raw[, lapply(.SD, function(x) length(unique(x))), by=outcome]
 ```
 
 ```{r, echo=F, results='hide'}
@@ -146,20 +147,25 @@ Count value distribution for the activity categories
 table(merged_raw$activity_category)
 ```
 
-Number of unique values when fixing the activity category
+Number of unique values grouped by activity category
 ```{r}
-type1 <- apply(merged_raw[merged_raw$activity_category == 'type 1', ], 
-               MARGIN=2, FUN=function(x) length(unique(x)))
+cols <- c(paste0('activity_char_', 1:9), 'activity_category', 'outcome')
+gr_col <- 'activity_category'
 
-type2 <- apply(merged_raw[merged_raw$activity_category == 'type 2', ], 
-               MARGIN=2, FUN=function(x) length(unique(x)))
+activities_dt <- merged_raw[, cols, with=F]
+dt <- activities_dt[
+    , lapply(.SD, function(x) length(unique(x))), by=activity_category]
+colnames(dt) <- gsub('activity_', '', colnames(dt))
 
-type7 <- apply(merged_raw[merged_raw$activity_category == 'type 7', ], 
-               MARGIN=2, FUN=function(x) length(unique(x)))
+merge_cols <- colnames(dt)[which(colnames(dt) != 'category')]
+long <- reshape(data=dt, varying=merge_cols,
+                v.names='num_unique_values',
+                timevar='variable', times=merge_cols, direction='long')
 
-type7 - type1
-type2 - type1
-type7 - type2
+ggplot(data=long, aes(x=variable, y=num_unique_values)) +
+    facet_grid(category ~ .) +
+    geom_bar(stat='identity') + coord_flip()
+    theme(axis.text.x=element_text(angle=90, size=11))
 ```
 
 ```{r, echo=F, results='hide'}
