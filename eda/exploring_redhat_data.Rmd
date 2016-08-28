@@ -27,6 +27,14 @@ render_html <-  function() {
 }
 ```
 
+Function that removes all r objects from memory
+```{r}
+clear <- function() {
+    rm(list=ls())
+}
+```
+
+
 ### Read data
 ```{r, cache=TRUE}
 merge_and_write_data_to_disk()
@@ -35,12 +43,17 @@ merged_raw <- fread('../data/processed/merged_data.csv')
 
 ### Data summary 
 ```{r, cache=TRUE}
-head(merged_raw,2)
+head(merged_raw, 5)
+head(merged_raw[which(merged_raw$activity_char_1 != ''), ])
 ```
+
+```{r, echo=F, results='hide'}
+gc()
+```
+
 
 Inspect outomces for variable activity_char_1
 ```{r, cache=T}
-gc()
 counts <- table(merged_raw[, c('activity_char_1', 'outcome'), with=F])
 
 activities_df <- as.data.frame(counts)
@@ -92,11 +105,12 @@ counts[order(counts, decreasing=T)]
 gc()
 ```
 Most outcomes for variable activity_char_1 are blanks. Counting the number of blanks for each variable is
-easily done by the colSums function
+easily done by the colSums function.
 ```{r, cache=T}
 colSums(merged_raw == '')
 ```
 
+Notice that the number of blanks for variables activity_char_1 up to 9 is constant. This indicates that each record contains data associated to one specific activity.
 ```{r, echo=F, results='hide'}
 gc()
 ```
@@ -110,38 +124,35 @@ apply(merged_raw, MARGIN=2, function(x) length(unique(x)))
 gc()
 ```
 
+Check if non blank activity values are recorded groupvise
+```{r, cache=T}
+for (ind in 2:10) {
+    colname <- paste0("activity_char_", ind)
+    if (sum((merged_raw$activity_char_1 != '') == (merged_raw[, colname, with=F])) != 0) {
+        print(paste("Non blank indices for activitiy_char_1 and activity_char_", ind, "differ"))
+    }
+}
+```
+
 By the data specification it is said that, type 1 activities are different from type 2-7 activities 
 in the sense that there are more known characteristics associated with type 1 activities (nine in total) 
 than type 2-7 activities (which have only one associated characteristic)
 
-Get number of unique values while fixing activity 2
-```{r, cache=T}
-apply(merged_raw[merged_raw$activity_char_2==merged_raw$activity_char_2[1], ],
-      MARGIN=2, function(x) length(unique(x)))
+Count value distribution for the activity categories
+```{r}
+table(merged_raw$activity_category)
 ```
 
-```{r, echo=F, results='hide'}
-gc()
-```
+Number of unique values when fixing the activity category
+```{r}
+apply(merged_raw[merged_raw$activity_category == 'type 1', ],
+      MARGIN=2, FUN=function(x) length(unique(x)))
 
-```{r, cache=T}
-apply(merged_raw[merged_raw$activity_char_2==merged_raw$activity_char_2[250], ],
-      MARGIN=2, function(x) length(unique(x)))
-```
+apply(merged_raw[merged_raw$activity_category == 'type 2', ],
+      MARGIN=2, FUN=function(x) length(unique(x)))
 
-Number of unique values while fixing activity 1
-```{r, cache=T}
-apply(merged_raw[merged_raw$activity_char_2==merged_raw$activity_char_1[1], ],
-      MARGIN=2, function(x) length(unique(x)))
-```
-
-```{r, echo=F, results='hide'}
-gc()
-```
-
-```{r, cache=T}
-apply(merged_raw[merged_raw$activity_char_2==merged_raw$activity_char_1[250], ],
-      MARGIN=2, function(x) length(unique(x)))
+apply(merged_raw[merged_raw$activity_category == 'type 7', ],
+      MARGIN=2, FUN=function(x) length(unique(x)))
 ```
 
 ```{r, echo=F, results='hide'}
