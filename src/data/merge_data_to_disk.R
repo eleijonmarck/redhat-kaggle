@@ -30,10 +30,9 @@ merge_and_write_data_to_disk <- function() {
     
     # Write merged data to disk
     merged_raw <- merge(x=people_raw, y=activities_raw, by='people_id')
-    colnames(merged_raw)[which(colnames(merged_raw) == 'V1')] <- 'row_ind'
     colnames(merged_raw)[which(colnames(merged_raw) == 'date.x')] <- 'people_date'
     colnames(merged_raw)[which(colnames(merged_raw) == 'date.y')] <- 'activity_date'
-    write.csv(x=merged_raw, file=fullname)
+    write.csv(x=merged_raw, file=fullname, row.names=F)
     
     return (paste('File', fullname, 'written to disk'))
 }

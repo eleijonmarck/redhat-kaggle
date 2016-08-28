@@ -148,14 +148,18 @@ table(merged_raw$activity_category)
 
 Number of unique values when fixing the activity category
 ```{r}
-apply(merged_raw[merged_raw$activity_category == 'type 1', ],
-      MARGIN=2, FUN=function(x) length(unique(x)))
+type1 <- apply(merged_raw[merged_raw$activity_category == 'type 1', ], 
+               MARGIN=2, FUN=function(x) length(unique(x)))
 
-apply(merged_raw[merged_raw$activity_category == 'type 2', ],
-      MARGIN=2, FUN=function(x) length(unique(x)))
+type2 <- apply(merged_raw[merged_raw$activity_category == 'type 2', ], 
+               MARGIN=2, FUN=function(x) length(unique(x)))
 
-apply(merged_raw[merged_raw$activity_category == 'type 7', ],
-      MARGIN=2, FUN=function(x) length(unique(x)))
+type7 <- apply(merged_raw[merged_raw$activity_category == 'type 7', ], 
+               MARGIN=2, FUN=function(x) length(unique(x)))
+
+type7 - type1
+type2 - type1
+type7 - type2
 ```
 
 ```{r, echo=F, results='hide'}
