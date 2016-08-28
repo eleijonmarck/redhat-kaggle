@@ -138,34 +138,38 @@ for (ind in 2:10) {
 }
 ```
 
+```{r}
+gc()
+```
+
+
 By the data specification it is said that, type 1 activities are different from type 2-7 activities 
 in the sense that there are more known characteristics associated with type 1 activities (nine in total) 
 than type 2-7 activities (which have only one associated characteristic)
 
 Count value distribution for the activity categories
-```{r}
+```{r, cache=T}
 table(merged_raw$activity_category)
 ```
 
 Number of unique values grouped by activity category
-```{r}
+```{r, cahce=T}
 cols <- c(paste0('activity_char_', 1:9), 'activity_category', 'outcome')
-gr_col <- 'activity_category'
 
 activities_dt <- merged_raw[, cols, with=F]
 dt <- activities_dt[
-    , lapply(.SD, function(x) length(unique(x))), by=activity_category]
+    , lapply(.SD, function(x) length(unique(x))), by=list(activity_category, outcome)]
 colnames(dt) <- gsub('activity_', '', colnames(dt))
 
-merge_cols <- colnames(dt)[which(colnames(dt) != 'category')]
+merge_cols <- colnames(dt)[which(!colnames(dt) %in% c('category', 'outcome'))]
 long <- reshape(data=dt, varying=merge_cols,
                 v.names='num_unique_values',
                 timevar='variable', times=merge_cols, direction='long')
 
-ggplot(data=long, aes(x=variable, y=num_unique_values)) +
+ggplot(data=long, aes(x=variable, y=num_unique_values, colour=factor(outcome))) +
     facet_grid(category ~ .) +
-    geom_bar(stat='identity') + coord_flip()
-    theme(axis.text.x=element_text(angle=90, size=11))
+    theme(axis.text.x=element_text(angle=90, size=9)) +
+    geom_bar(stat='identity') #+ coord_flip()
 ```
 
 ```{r, echo=F, results='hide'}
