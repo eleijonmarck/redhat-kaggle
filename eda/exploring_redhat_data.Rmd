@@ -128,8 +128,11 @@ Check if non blank activity values are recorded groupvise
 ```{r, cache=T}
 for (ind in 2:10) {
     colname <- paste0("activity_char_", ind)
-    if (sum((merged_raw$activity_char_1 != '') == (merged_raw[, colname, with=F])) != 0) {
-        print(paste("Non blank indices for activitiy_char_1 and activity_char_", ind, "differ"))
+    if (sum((merged_raw$activity_char_1 != '') != (merged_raw[, colname, with=F] != '')) != 0) {
+        print(paste("Non blank indices for activitiy_char_1 and activity_char", ind, "differ"))
+    }
+    else {
+        print(paste("Non blank indices for activitiy_char_1 and activity_char", ind, "are equal"))
     }
 }
 ```
